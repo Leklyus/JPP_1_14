@@ -1,14 +1,11 @@
 package jm.task.core.jdbc.dao;
 
-import jm.task.core.jdbc.bl.Util;
 import jm.task.core.jdbc.model.User;
+import jm.task.core.jdbc.util.Util;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 
 import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.TypedQuery;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
@@ -74,7 +71,7 @@ public class UserDaoHibernateImpl implements UserDao {
         try (Session session = Util.getSession()) {
             session.beginTransaction();
 
-            session.delete((User)session.load(User.class,id));
+            session.delete((User) session.load(User.class, id));
 
             session.getTransaction().commit();
         } catch (RuntimeException e) {
@@ -86,10 +83,13 @@ public class UserDaoHibernateImpl implements UserDao {
     public List<User> getAllUsers() {
         List<User> data;
         try (Session session = Util.getSession()) {
-            CriteriaBuilder builder = session.getCriteriaBuilder();
-            CriteriaQuery<User> criteria = builder.createQuery(User.class);
-            criteria.from(User.class);
-            data = session.createQuery(criteria).getResultList();
+//            CriteriaBuilder builder = session.getCriteriaBuilder();
+//            CriteriaQuery<User> criteria = builder.createQuery(User.class);
+//            criteria.from(User.class);
+//            data = session.createQuery(criteria).getResultList();
+
+            TypedQuery<User> query = session.createQuery("from User", User.class);
+            data = query.getResultList();
 
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
@@ -103,9 +103,8 @@ public class UserDaoHibernateImpl implements UserDao {
         try (Session session = Util.getSession()) {
             session.beginTransaction();
 
-            String sql = "TRUNCATE TABLE users";
-
-            Query query = session.createSQLQuery(sql);
+            String stringQuery = "DELETE FROM User";
+            Query query = session.createQuery(stringQuery);
             query.executeUpdate();
 
             session.getTransaction().commit();
